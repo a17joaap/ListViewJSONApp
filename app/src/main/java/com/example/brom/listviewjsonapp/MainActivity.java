@@ -1,5 +1,6 @@
 package com.example.brom.listviewjsonapp;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -25,26 +25,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-
-
-
-// Create a new class, Mountain, that can hold your JSON data
-
-// Create a ListView as in "Assignment 1 - Toast and ListView"
-
-// Retrieve data from Internet service using AsyncTask and the included networking code
-
-// Parse the retrieved JSON and update the ListView adapter
-
-// Implement a "refresh" functionality using Android's menu system
-
 
 public class MainActivity extends AppCompatActivity {
-    List<Mountain> mountainList = new ArrayList<>();
-    List<String> mountainNames = new ArrayList<>();
-
+    ArrayList<Mountain> mountainList = new ArrayList<>();
+    MountainAdapter adapter;
     ListView listView;
+    public static final String mName = "Mountain Name";
+    public static final String mLoc = "Mountain Location";
+    public static final String mHeight = "Mountain Height";
+    public static final String mURL = "Picture URL";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,23 +48,22 @@ public class MainActivity extends AppCompatActivity {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        String mountain = String.valueOf(adapterView.getItemAtPosition(i));
+                        String mountain = mountainList.get(i).name;
                         String location = mountainList.get(i).location;
-                        int height = mountainList.get(i).height;
-                        Toast.makeText(getApplicationContext(), mountain+" is located in the "+location+" and is "+height+"m high", Toast.LENGTH_LONG).show();
+                        String height = mountainList.get(i).height;
+                        String url = mountainList.get(i).pictureURL;
 
+                        Intent intent = new Intent(getApplicationContext(),MountainActivity.class);
+                        intent.putExtra(mName, mountain);
+                        intent.putExtra(mLoc, location);
+                        intent.putExtra(mHeight, height);
+                        intent.putExtra(mURL, url);
+
+                        startActivity(intent);
                     }
                 }
         );
     }
-
-
-
-
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -86,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_refresh) {
             mountainList.clear();
-            mountainNames.clear();
+            //mountainNames.clear();
             new FetchData().execute();
             Toast refreshed = Toast.makeText(this, "List refreshed", Toast.LENGTH_SHORT);
             refreshed.show();
@@ -169,19 +158,22 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray mountains = new JSONArray(o);
                 for (int i = 0; i < mountains.length(); i++) {
                     JSONObject mountain = mountains.getJSONObject(i);
+                    // mountain.getJSONObject("auxdata") threw an error saying it was a string, so this was the solution..
+                    String auxdata = mountain.getString("auxdata");
+                    JSONObject seemsLikeThereShouldBeAnEasierWayToDoThis = new JSONObject(auxdata);
+
                     String name = mountain.getString("name");
                     String location = mountain.getString("location");
-                    int height = mountain.getInt("size");
+                    String height = mountain.getString("size");
+                    String picUrl = seemsLikeThereShouldBeAnEasierWayToDoThis.getString("img");
 
-                    Mountain m = new Mountain(name,location,height);
+                    Mountain m = new Mountain(name,location,height,picUrl);
                     mountainList.add(m);
-                    mountainNames.add(name);
-
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item_textview, R.id.itemTextView, mountainNames);
+            adapter = new MountainAdapter(getApplicationContext(), mountainList);
             listView.setAdapter(adapter);
         }
     }

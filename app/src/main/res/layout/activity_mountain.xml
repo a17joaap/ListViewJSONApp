@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:weightSum="1"
+    android:background="#FAFAFA"
+    android:clipToPadding="false"
+    android:padding="30dp" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/card_bg"
+        android:layout_gravity="center_horizontal"
+        android:elevation="10dp">
+
+        <ImageView
+            android:id="@+id/card_imageView"
+            android:layout_width="320dp"
+            android:layout_height="240dp"
+            android:scaleType="fitXY" />
+
+        <TextView
+            android:id="@+id/card_mtnName"
+            android:text="Mountain Name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="@android:color/black"
+            android:textSize="25sp"
+            />
+        <TextView
+            android:id="@+id/card_mtnHeight"
+            android:text="Height: "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="20sp"
+            />
+
+        <TextView
+            android:id="@+id/card_mtnLoc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="15dp"
+            android:text="Location: "
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+</LinearLayout>
