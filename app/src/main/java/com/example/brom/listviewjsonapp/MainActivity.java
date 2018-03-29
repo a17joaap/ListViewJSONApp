@@ -4,6 +4,19 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +24,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 
 
 // Create a new class, Mountain, that can hold your JSON data
@@ -25,11 +41,58 @@ import java.net.URL;
 
 
 public class MainActivity extends AppCompatActivity {
+    List<Mountain> mountainList = new ArrayList<>();
+    List<String> mountainNames = new ArrayList<>();
 
+    ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FetchData getJson = new FetchData();
+        getJson.execute();
+
+        listView = (ListView) findViewById(R.id.mtnList);
+
+        listView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        String mountain = String.valueOf(adapterView.getItemAtPosition(i));
+                        String location = mountainList.get(i).location;
+                        int height = mountainList.get(i).height;
+                        Toast.makeText(getApplicationContext(), mountain+" is located in the "+location+" and is "+height+"m high", Toast.LENGTH_LONG).show();
+
+                    }
+                }
+        );
+    }
+
+
+
+
+
+
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_refresh) {
+            mountainList.clear();
+            mountainNames.clear();
+            new FetchData().execute();
+            Toast refreshed = Toast.makeText(this, "List refreshed", Toast.LENGTH_SHORT);
+            refreshed.show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private class FetchData extends AsyncTask<Void,Void,String>{
@@ -45,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 // Construct the URL for the Internet service
-                URL url = new URL("_ENTER_THE_URL_TO_THE_PHP_SERVICE_SERVING_JSON_HERE_");
+                URL url = new URL("http://wwwlab.iit.his.se/brom/kurser/mobilprog/dbservice/admin/getdataasjson.php?type=brom");
 
                 // Create the request to the PHP-service, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -101,7 +164,28 @@ public class MainActivity extends AppCompatActivity {
 
             // Implement a parsing code that loops through the entire JSON and creates objects
             // of our newly created Mountain class.
+
+            try {
+                JSONArray mountains = new JSONArray(o);
+                for (int i = 0; i < mountains.length(); i++) {
+                    JSONObject mountain = mountains.getJSONObject(i);
+                    String name = mountain.getString("name");
+                    String location = mountain.getString("location");
+                    int height = mountain.getInt("size");
+
+                    Mountain m = new Mountain(name,location,height);
+                    mountainList.add(m);
+                    mountainNames.add(name);
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item_textview, R.id.itemTextView, mountainNames);
+            listView.setAdapter(adapter);
         }
     }
 }
+
+
 
